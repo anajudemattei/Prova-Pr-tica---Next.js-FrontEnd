@@ -5,26 +5,31 @@
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     margin: 2rem auto;
-    flex-direction: row;
-
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
 }
 
 .h1 {
     font-size: 1rem;
     margin-bottom: 1rem;
+
 }
 
 .p {
     font-size: 2rem;
-
+    font-family: var(--font);
 }
 
 .image {
-    width: 40%;
+    width: 30%;
     height: auto;
     border-radius: 8px;
     margin-top: 1rem;
     align-items: flex-end;
+    border-radius: 50%;
 }
 
 .button {
@@ -35,4 +40,5 @@
     text-decoration: none;
     border-radius: 4px;
     transition: background-color 0.3s ease;
+    margin-top: 25px;
 }
