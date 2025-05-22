@@ -12,7 +12,7 @@ export const metadata = {
     icons: {
     icon: "/icons/favicon.ico",
   },
-    description: "Projeto pra mostrar tudo que eu sei",
+    description: "",
 
 };
 

@@ -14,7 +14,7 @@ export default function Pacientes() {
         pacientes: [],
         loading: true,
         current: 1,
-        pageSize: 0,
+        pageSize: 5, 
     });
 
     const [modalInfo, setModalInfo] = useState({
@@ -26,23 +26,16 @@ export default function Pacientes() {
 
     useEffect(() => {
         const fetchPacientes = async () => {
-            const cached = getSessionStorage("pacientesData", []);
-            if (cached.length > 0) {
-                setData({ pacientes: cached, loading: false, current: 1, pageSize: 5 });
-                return;
-            }
-
             try {
+                console.log("URL da API:", `${process.env.NEXT_PUBLIC_API_URL}/paciente`); 
                 const { data: pacientes } = await axios.get(
-                    `${process.env.NEXT_PUBLIC_API_URL}/pacientes`,
-                    {
-                        headers: HEADERS,
-                    }
+                    `${process.env.NEXT_PUBLIC_API_URL}/paciente`,
+                    { headers: HEADERS }
                 );
-                setSessionStorage("pacientesData", pacientes);
                 setData({ pacientes, loading: false, current: 1, pageSize: 5 });
-            } catch {
-                toast.error("Erro ao carregar PACIENTES!");
+            } catch (error) {
+                console.error("Erro ao carregar pacientes:", error.response || error.message);
+                toast.error("Erro ao carregar pacientes!");
                 setData((d) => ({ ...d, loading: false }));
             }
         };
@@ -53,24 +46,14 @@ export default function Pacientes() {
     const openModal = async (paciente) => {
         setModalInfo({ visible: true, paciente, consulta: null, loading: true });
 
-        const cacheKey = `consulta_${paciente.id}`;
-        const cached = getSessionStorage(cacheKey, null);
-        if (cached) {
-            setModalInfo((m) => ({ ...m, consulta: cached, loading: false }));
-            return;
-        }
-
         try {
             const { data: consulta } = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/consulta/${paciente.id}`,
-                {
-                    headers: HEADERS,
-                }
+                `${process.env.NEXT_PUBLIC_API_URL}/consulta/${paciente.consulta_id}`,
+                { headers: HEADERS }
             );
-            setSessionStorage(cacheKey, consulta);
             setModalInfo((m) => ({ ...m, consulta, loading: false }));
         } catch {
-            toast.error("Erro ao carregar avaliação.");
+            toast.error("Erro ao carregar consulta.");
             setModalInfo((m) => ({ ...m, loading: false }));
         }
     };
@@ -82,8 +65,8 @@ export default function Pacientes() {
 
     return (
         <div>
-            <h1>Lista de Pacientes e Consultas</h1>
-
+            <div className={styles.paginationContainer}>
+            <h1 className={styles.h1}>Lista de Pacientes</h1>
             <Pagination
                 current={data.current}
                 pageSize={data.pageSize}
@@ -94,14 +77,19 @@ export default function Pacientes() {
                 showSizeChanger
                 pageSizeOptions={["5", "10", "100"]}
             />
+            </div>
 
             {data.loading ? (
+                <div className={styles.loadingContainer}>
                 <Image
-                    src="/image/loading.gif"
+                    src="/images/loading.gif"
                     width={300}
                     height={200}
                     alt="Loading"
-                 />
+                    unoptimized
+                    priority 
+                />
+                </div>
             ) : (
                 <div className={styles.cardsContainer}>
                     {paginatedPacientes().map((paciente) => (
@@ -116,7 +104,7 @@ export default function Pacientes() {
                                     src={
                                         paciente.photo && paciente.photo.startsWith("http")
                                             ? paciente.photo
-                                            : "/images/220.svg"
+                                            : "/image/220.svg"
                                     }
                                     width={220}
                                     height={220}
@@ -125,7 +113,7 @@ export default function Pacientes() {
                         >
                             <Card.Meta
                                 title={paciente.name}
-                                description={`Email: ${paciente.email}`}
+                                description={paciente.email}
                             />
                         </Card>
                     ))}
@@ -158,24 +146,24 @@ export default function Pacientes() {
                 ) : modalInfo.consulta ? (
                     <div className={styles.consultaInfo}>
                         <p>
-                            <span className={styles.label}>consulta:</span>{" "}
-                            {modalInfo.consulta.nome}
+                            <span className={styles.label}>Consulta:</span>{" "}
+                            {modalInfo.consulta.name}
                         </p>
                         <p>
                             <span className={styles.label}>Paciente:</span>{" "}
-                            {modalInfo.consulta.gerente || "Não informado"}
+                            {modalInfo.consulta.paciente.name}
                         </p>
                         <p>
                             <span className={styles.label}>Data:</span>{" "}
-                            {modalInfo.consulta.data || "Não informado"}
+                            {modalInfo.consulta.data}
                         </p>
                         <p>
                             <span className={styles.label}>Hora:</span>{" "}
-                            {modalInfo.consulta.hora || "Não informado"}
+                            {modalInfo.consulta.hora}
                         </p>
                     </div>
                 ) : (
-                    <p style={{ textAlign: "center" }}>Informações do consulta não encontradas.</p>
+                    <p style={{ textAlign: "center" }}>Informações da consulta não encontradas.</p>
                 )}
             </Modal>
 
